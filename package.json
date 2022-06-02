@@ -2,13 +2,22 @@
   "name": "expresso",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "dev": "browser-sync start --server --files \"**/*.js\"",
+    "watch": "watchify index.js -o bundle.js",
+    "build": "NODE_ENV=production node server.js"
   },
   "author": "Tiffany Chao",
   "license": "MIT",
   "dependencies": {
     "dotenv": "^16.0.1",
-    "express": "^4.18.1"
+    "express": "^4.18.1",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.27.10",
+    "eslint": "^8.16.0",
+    "watchify": "^4.0.0"
   }
 }

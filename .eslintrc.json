@@ -1,0 +1,13 @@
+{
+    "root": true,
+    "extends": "eslint:recommended",
+    "env": {
+        "browser": true,
+        "node": true,
+        "es6": true
+    },
+    "rules": {
+        "quotes": ["error", "double"],
+        "indent": ["error", 4]
+    }
+}
