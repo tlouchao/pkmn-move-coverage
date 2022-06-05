@@ -1,6 +1,6 @@
 "use strict"
 
-// const _ = require("lodash")
+const _ = require("lodash")
 
 let universe = document.getElementById("universe")
 universe.innerHTML = "Hello, Pluto!"
@@ -9,19 +9,42 @@ universe.innerHTML = "Hello, Pluto!"
 
 let p = document.createElement("p")
 p.setAttribute("id", "neptune")
-p.innerHTML = "Galaxian!"
+p.innerHTML = "Galaxy"
 document.body.appendChild(p)
 
 const fruits = {
-    orange: "soda",
+    orange: "juice",
     apple: "strudel",
     kiwi: "bird",
+    cornucopia: {
+        corn: "cob"
+    },
+    summer() {
+        console.log(`sunny summer swelter ${this.apple}`)
+    },
 }
 
-const compass = ["north", "south", "west"]
+const loops = _.cloneDeep(fruits)
 
-const loops = {...fruits}
-loops.kiwi = "extinct"
+loops.cornucopia.corn = "bread"
 
-console.log(`Fruits: ${fruits.kiwi}`)
-console.log(`Loops: ${loops.kiwi}`)
+console.log(`Fruits: ${fruits.cornucopia.corn}`)
+
+console.log(`Loops: ${loops.cornucopia.corn}`)
+
+async function goodNight() {
+    let promise = new Promise((resolve, reject) => {
+        setTimeout(() => resolve("success!"), 2000)
+    })
+    let result
+    try {
+        result = await promise
+        console.log(result)
+    } catch(err) {
+        console.log(err)
+    } 
+}
+
+goodNight()
+
+
