@@ -2,14 +2,12 @@
 
 const _cloneDeep = require("lodash/cloneDeep")
 
-let universe = document.getElementById("universe")
-universe.innerHTML = "Hello, Pluto!"
-
-// let answer = prompt("Welcome to the solar system!", "")
+//let universe = document.getElementById("universe")
+//universe.innerHTML = "Hello, Pluto!"
 
 let p = document.createElement("p")
 p.setAttribute("id", "neptune")
-p.innerHTML = "Galaxy"
+p.innerHTML = "Galaxy!"
 document.body.appendChild(p)
 
 const fruits = {

@@ -4,8 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "browser-sync start --server --files \"**/*.js\"",
-    "watch": "watchify index.js -o bundle.js",
+    "dev": "browser-sync start --server --files \"**/*\" & watchify index.js -o bundle.js",
     "build": "NODE_ENV=production node server.js"
   },
   "author": "Tiffany Chao",
