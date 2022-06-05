@@ -16,4 +16,4 @@ NODE_ENV="development"
 PORT=YOUR_PORT_NUMBER
 ```
 
-Run `npm run dev`. Editing and saving changes to `index.html`, `index.js` and/or `server.js` should trigger a refresh with updated changes to the DOM and console.
+Run `npm run dev`. Editing and saving changes to `index.html` or `index.js` should trigger a refresh with updated changes to the DOM and console. Run `npx eslint .` to lint JS files.

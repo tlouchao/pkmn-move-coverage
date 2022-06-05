@@ -46,6 +46,6 @@ const server = http.createServer((req, res) => {
 
 server.listen(process.env.PORT || 3000, () => {
     console.log(`Listening to port ${(process.env.PORT) ? 
-                process.env.PORT : 
-                3000}`)
+        process.env.PORT : 
+        3000}`)
 })

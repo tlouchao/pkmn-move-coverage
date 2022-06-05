@@ -1,10 +1,14 @@
 {
     "root": true,
     "extends": "eslint:recommended",
+    "ignorePatterns": ["bundle.js"],
     "env": {
         "browser": true,
         "node": true,
         "es6": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 8
     },
     "rules": {
         "quotes": ["error", "double"],
