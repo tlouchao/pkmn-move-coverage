@@ -1,6 +1,6 @@
 "use strict"
 
-const _ = require("lodash")
+const _cloneDeep = require("lodash/cloneDeep")
 
 let universe = document.getElementById("universe")
 universe.innerHTML = "Hello, Pluto!"
@@ -24,7 +24,7 @@ const fruits = {
     },
 }
 
-const loops = _.cloneDeep(fruits)
+const loops = _cloneDeep(fruits)
 
 loops.cornucopia.corn = "bread"
 
