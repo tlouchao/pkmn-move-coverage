@@ -32,7 +32,7 @@ console.log(`Fruits: ${fruits.cornucopia.corn}`)
 console.log(`Loops: ${loops.cornucopia.corn}`)
 
 async function goodNight() {
-    let promise = new Promise((resolve, reject) => {
+    let promise = new Promise((resolve) => {
         setTimeout(() => resolve("success!"), 2000)
     })
     let result
