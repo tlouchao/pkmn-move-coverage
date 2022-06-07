@@ -1,35 +1,46 @@
+require("dotenv").config()
+
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
 
 const path = require("path")
-const dotenv = require("dotenv")
-
-dotenv.config()
 
 module.exports = {
-    mode: "development",
-    entry: "./src/index.js",
+    mode: process.env.NODE_ENV || "development",
+    entry: path.join(__dirname, "src", "index.js"),
+    target: "web",
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "bundle.js",
+        filename: "bundle.client.js",
     },
     devServer: {
         static: {
             directory: path.join(__dirname, "public"),
         },
-        port: 3000
+        historyApiFallback: true,
+        port: process.env.PORT || 3000,
+    },
+    devtool: process.env.NODE_ENV == "development" ? "source-map" : false,
+    resolve: {
+        extensions: [".js",".jsx"]
     },
     module: {
         rules: [
             {
-                test: /\.(png|jpg|ico)?$/,
+                test: /\.(js|jsx)$/,
+                exclude: /node_modules/,
+                loader:"babel-loader",
+            },
+            {
+                test: /\.(png|jpg)?$/,
+                exclude: /node_modules/,
                 type: "asset/resource",
             },
         ],
     },
     plugins: [    
         new HtmlWebpackPlugin({
-            template: "./src/index.html",
+            template: path.join(__dirname, "src", "index.html"),
             inject: "body"
         }),
         new CopyWebpackPlugin({

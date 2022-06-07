@@ -1,0 +1,15 @@
+{
+    "root": true,
+    "extends": "eslint:recommended",
+    "ignorePatterns": ["**/node_modules/**"],
+    "env": {
+        "node": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 8
+    },
+    "rules": {
+        "quotes": ["error", "double"],
+        "indent": ["error", 4]
+    }
+}
