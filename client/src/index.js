@@ -11,7 +11,7 @@ root.render(<div>
 )
 
 async function httpGet(url) {
-    const result =  await fetch(url,
+    const result = await fetch(url,
         {
             method: "GET",
             headers: {
@@ -22,16 +22,21 @@ async function httpGet(url) {
             if (!response.ok) {
                 throw new Error(response.status)
             }
+            console.log("OK")
             return response.json()
         })
         .then(data => {
+            console.log("data")
             if ("pokemon_species" in data){
                 return data.pokemon_species.map(x => x.name)
             } else {
                 return JSON.stringify(data)
             }
         })
-        .catch(err => err)
+        .catch(err => {
+            console.log(err)
+            return err
+        })
     if (typeof result[Symbol.iterator] === "function" && 
     typeof result !== "string") {
 

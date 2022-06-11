@@ -8,18 +8,21 @@
     "node": ">=16.15.1"
   },
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js"
+    "test": "jest --runInBand --detectOpenHandles --verbose",
+    "dev": "NODE_ROOT=./ nodemon -r dotenv/config ./src/server.js",
+    "start": "NODE_ROOT=./ node -r dotenv/config ./src/server.js"
   },
   "author": "Tiffany Chao",
   "license": "MIT",
   "dependencies": {
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
-    "lodash": "^4.17.21"
+    "mongoose": "^6.3.5"
   },
   "devDependencies": {
     "eslint": "^8.16.0",
+    "jest": "^28.1.1",
+    "mongodb-memory-server": "^8.6.0",
     "nodemon": "^2.0.16"
   }
 }
