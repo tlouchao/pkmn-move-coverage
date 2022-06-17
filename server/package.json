@@ -15,8 +15,10 @@
   "author": "Tiffany Chao",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.27.2",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "migrate-mongo": "^9.0.0",
     "mongoose": "^6.3.5"
   },
   "devDependencies": {

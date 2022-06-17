@@ -1,0 +1,10 @@
+const axios = require("axios")
+axios.get("https://pokeapi.co/api/v2/move/72/")
+          .then(resp => resp.data)
+          .then(data => {
+            console.log(data.name)
+            console.log(data.power)
+            console.log(data.accuracy)
+            data.learned_by_pokemon.map(p => console.log("  " + p.name))
+          })
+          .catch(err => console.log(err))
