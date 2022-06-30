@@ -1,0 +1,1 @@
+const MoveLearnedBySpecies = require("../models/moveLearnedBySpecies")

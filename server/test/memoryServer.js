@@ -7,13 +7,13 @@ module.exports.connectDB = async() => {
   await server.start()
   const uri = server.getUri()
   await mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true})
-              .then(() => {
-                console.log('Connected to database')
-                return mongoose.connection
-              })
-              .catch(err => {
-                console.error(`Error connecting to the database. \n${err}`)
-              })
+    .then(() => {
+      console.log('Connected to database')
+      return mongoose.connection
+    })
+    .catch(err => {
+      console.error(`Error connecting to the database. \n${err}`)
+    })
 }
 
 module.exports.clearDB = async() => {
@@ -27,11 +27,12 @@ module.exports.clearDB = async() => {
 module.exports.closeDB = async() => {
   await mongoose.connection.dropDatabase()
   await mongoose.connection.close()
+    .then(() => {
+      console.log('Closed connection')
+    })
+    .catch(err => {
+      console.error(`Error closing connection. \n${err}`)
+    })
+
   await server.stop()
-        .then(() => {
-          console.log('Closed connection')
-        })
-        .catch(err => {
-          console.error(`Error closing connection. \n${err}`)
-        })
 }

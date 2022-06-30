@@ -1,0 +1,1 @@
+const Type = require("../models/type")
