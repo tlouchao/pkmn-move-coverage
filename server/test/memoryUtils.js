@@ -1,5 +1,14 @@
 const server = require("./memoryServer")
 
+// 12-byte object ID
+module.exports.zeroId = (() => { 
+    let x = ''
+    for (let i = 0; i < 12; i++){ 
+        x += ("00") 
+    } 
+    return x
+})()
+
 module.exports.setupTeardown = () => {
     beforeAll(async() => await server.connectDB())
     afterEach(async() => await server.clearDB())

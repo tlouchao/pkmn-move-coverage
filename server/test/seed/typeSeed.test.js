@@ -1,6 +1,7 @@
 const Type = require("../../src/models/type")
 const { createType, updateType } = require("../../src/seed/typeSeed")
-const { setupTeardown, 
+const { zeroId,
+        setupTeardown, 
         validateNotEmpty, 
         validateMongoDupeError, 
         validateMongoCastError,
@@ -59,7 +60,6 @@ describe("Insert and update type", () => {
         const grass = await createType(4, "grass")
         const electric = await createType(5, "electric")
         
-        // object id, NOT user-defined id
         let water = await createType(3, "water")
         water = await updateType(water.id, "ddfrom", [grass._id, electric._id])
 
@@ -79,12 +79,11 @@ describe("Insert and update type", () => {
     })
 
     it("should reject if array contains duplicate object IDs", async() => {
-        const dup_id = "62bf2c571ae278d037f43bab"
         try {
-            t3 = await updateType(t1.id, "hdto", [dup_id, dup_id])
+            t3 = await updateType(t1.id, "hdto", [zeroId, zeroId])
         } catch (err) {
             validateMongoValidationError(err.name, err.message, 
-                `"${dup_id},${dup_id}" must be an array of unique object IDs'`)
+                `"${zeroId},${zeroId}" must be an array of unique object IDs'`)
         }
     })
 })

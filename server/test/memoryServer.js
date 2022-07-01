@@ -1,3 +1,4 @@
+const logger = require("../src/logger")
 const mongoose = require("mongoose")
 const { MongoMemoryServer } = require("mongodb-memory-server")
 
@@ -8,11 +9,11 @@ module.exports.connectDB = async() => {
   const uri = server.getUri()
   await mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true})
     .then(() => {
-      console.log('Connected to in-memory database')
+      logger.debug('Connected to in-memory database')
       return mongoose.connection
     })
     .catch(err => {
-      console.error(`Error connecting to the in-memory database. \n${err}`)
+      logger.error(`Error connecting to the in-memory database. \n${err}`)
     })
 }
 
@@ -21,6 +22,7 @@ module.exports.clearDB = async() => {
   for (const k in collections){
     const v = collections[k]
     await v.deleteMany()
+    logger.debug('Cleared in-memory database')
   }
 }
 
@@ -28,10 +30,10 @@ module.exports.closeDB = async() => {
   await mongoose.connection.dropDatabase()
   await mongoose.connection.close()
     .then(() => {
-      console.log('Closed connection')
+      logger.debug('Closed connection')
     })
     .catch(err => {
-      console.error(`Error closing connection. \n${err}`)
+      logger.error(`Error closing connection. \n${err}`)
     })
 
   await server.stop()

@@ -1,4 +1,5 @@
 const { connectDB, closeDB } = require("./db")
+const logger = require("./logger")
 const express = require("express")
 
 const root = process.env.NODE_ROOT
@@ -19,17 +20,17 @@ app.get('*', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`App listening at http://localhost:${port}`)
+    logger.info(`App listening at http://localhost:${port}`)
 })
 
 process.on('SIGINT', async() => {
-    console.log("\nExiting...")
+    logger.info("\nExiting...")
     await closeDB()
     process.exit()
 })
 
 process.on('SIGTERM', async() => {
-    console.log("\nExiting...")
+    logger.info("\nExiting...")
     await closeDB()
     process.exit()
 })

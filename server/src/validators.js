@@ -1,6 +1,10 @@
 const mongoose = require("mongoose")
 
-module.exports.validateRefs = val => {
+module.exports.validateRef = val => mongoose.isValidObjectId(val)
+
+module.exports.validateRefMsg = props => `"${props.value}" must be an object ID'`
+
+module.exports.validateArrRef = val => {
     if (val == ``) { // allow empty array
         return true
     } else {
@@ -10,6 +14,6 @@ module.exports.validateRefs = val => {
     }
 }
 
-module.exports.validateRefsMsg = props => {
+module.exports.validateArrRefMsg = props => {
     return `"${props.value}" must be an array of unique object IDs'`
 }
