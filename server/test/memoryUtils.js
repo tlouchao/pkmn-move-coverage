@@ -16,3 +16,12 @@ module.exports.validateMongoDupeError = (name, code) => {
     expect(name).toEqual("MongoServerError")
     expect(code).toBe(11000)
 }
+
+module.exports.validateMongoCastError = (name, code) => {
+    expect(name).toEqual("CastError")
+}
+
+module.exports.validateMongoValidationError = (name, msg_actual, msg_expected) => {
+    expect(name).toEqual("ValidationError")
+    expect(msg_actual).toContain(msg_expected)
+}

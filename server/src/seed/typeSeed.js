@@ -9,9 +9,12 @@ async function createType(id, name){
     }
 }
 
-async function updateType(first_id, second_id, arr){
-    // todo
-    return
+async function updateType(id, key, val){
+    try {
+        return await Type.findOneAndUpdate({id: id}, {[key]: val}, {new: true, runValidators: true})
+    } catch (err) {
+        throw err
+    }
 }
 
-module.exports = { createType }
+module.exports = { createType, updateType }

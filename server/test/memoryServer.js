@@ -8,11 +8,11 @@ module.exports.connectDB = async() => {
   const uri = server.getUri()
   await mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true})
     .then(() => {
-      console.log('Connected to database')
+      console.log('Connected to in-memory database')
       return mongoose.connection
     })
     .catch(err => {
-      console.error(`Error connecting to the database. \n${err}`)
+      console.error(`Error connecting to the in-memory database. \n${err}`)
     })
 }
 
