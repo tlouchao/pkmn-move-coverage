@@ -20,7 +20,7 @@ describe("Insert one generation", () => {
 
     it("Should not insert if ID exists", async() => {
         try {
-            const g2 = await createGeneration(1, "Generation I")
+            await createGeneration(1, "Generation I")
         } catch (err) {
             validateMongoDupeError(err.name, err.code)
         }
@@ -28,7 +28,7 @@ describe("Insert one generation", () => {
 
     it("Should not insert if name exists", async() => {
         try {
-            const g2 = await createGeneration(99, "Generation I")
+            await createGeneration(99, "Generation I")
         } catch (err) {
             validateMongoDupeError(err.name, err.code)
         }

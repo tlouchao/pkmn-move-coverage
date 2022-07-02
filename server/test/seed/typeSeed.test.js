@@ -1,6 +1,5 @@
-const Type = require("../../src/models/type")
 const { createType, updateType } = require("../../src/seed/typeSeed")
-const { zeroId,
+const { generateId,
         setupTeardown, 
         validateNotEmpty, 
         validateMongoDupeError, 
@@ -8,6 +7,9 @@ const { zeroId,
         validateMongoValidationError } = require("../memoryUtils")
 
 // setup and teardown
+const zeroId = generateId()
+const decId = generateId(10)
+
 let t1
 beforeEach(async() => {
     t1 = await createType(1, "normal")
@@ -66,6 +68,8 @@ describe("Insert and update type", () => {
         expect(water.id).toEqual(3)
         expect(water.name).toEqual("water")
         expect(water.ddfrom).toHaveLength(2)
+
+        // fields equality, instead of object equality
         expect(water.ddfrom).toContainEqual(grass._id)
         expect(water.ddfrom).toContainEqual(electric._id)
     })
@@ -84,6 +88,15 @@ describe("Insert and update type", () => {
         } catch (err) {
             validateMongoValidationError(err.name, err.message, 
                 `"${zeroId},${zeroId}" must be an array of unique object IDs'`)
+        }
+    })
+
+    it("should reject if object IDs do not exist in Type path", async() => {
+        try {
+            t3 = await updateType(t1.id, "ddfrom", [zeroId, decId])
+        } catch (err) {
+            validateMongoValidationError(err.name, err.message, 
+                `One or more of object IDs "${zeroId},${decId}" does not exist in Type path`)
         }
     })
 })

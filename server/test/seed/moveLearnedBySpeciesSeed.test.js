@@ -1,9 +1,10 @@
 const { createMoveLearnedBySpecies }  = require("../../src/seed/moveLearnedBySpeciesSeed")
-const { zeroId, 
+const { generateId, 
         setupTeardown, 
         validateNotEmpty} = require("../memoryUtils")
 
 // setup and teardown
+const zeroId = generateId()
 setupTeardown()
 
 describe("Insert one move learned by species", () => {

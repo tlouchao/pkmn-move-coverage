@@ -6,7 +6,11 @@ module.exports.isInGeneration = async(val) => await Generation.exists({_id: val}
 
 module.exports.isInType = async(val) => await Type.exists({_id: val})
 
+module.exports.isEmptyOrInType = async(val) => (!val) || await Type.exists({_id: val})
+
 module.exports.isObjectId = val => mongoose.isValidObjectId(val)
+
+module.exports.isEmptyOrObjectId = val => (!val) || mongoose.isValidObjectId(val)
 
 module.exports.isInPathMsg = props => `"${props.value}" does not exist in ${props.path} path`
 

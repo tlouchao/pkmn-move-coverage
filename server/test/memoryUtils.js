@@ -1,13 +1,21 @@
 const server = require("./memoryServer")
 
-// 12-byte object ID
-module.exports.zeroId = (() => { 
-    let x = ''
+module.exports.generateId = (num) => {
+    // convert num to hex string
+    let hex
+    if (num >= 0 && num <= 255){
+        hex = num.toString(16).padStart(2, '0')
+    } else {
+        hex = "00" // default
+    }
+
+    // 12-byte object ID
+    let id = ''
     for (let i = 0; i < 12; i++){ 
-        x += ("00") 
+        id += (hex) 
     } 
-    return x
-})()
+    return id
+}
 
 module.exports.setupTeardown = () => {
     beforeAll(async() => await server.connectDB())
