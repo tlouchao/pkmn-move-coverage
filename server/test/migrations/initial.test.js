@@ -1,7 +1,9 @@
-const { setupTeardown, validateNotEmpty } = require("../memoryUtils")
+'use strict'
+const { setupTeardown } = require("../memoryUtils")
 
 const Generation = require("../../src/models/generation")
 const Type = require("../../src/models/type")
+const Species = require("../../src/models/species")
 
 const { createMoveLearnedBySpecies }  = require("../../src/seed/moveLearnedBySpeciesSeed")
 const { createMove }  = require("../../src/seed/moveSeed")
@@ -74,7 +76,6 @@ describe.skip.each([
         }
 
         const collection = await model.find({})
-        console.log(collection)
         expect(collection[0].id).toEqual(id)
         expect(collection[0].name).toEqual(name)
     })
@@ -93,7 +94,6 @@ describe.skip(`Update type data concurrently in DB`, () => {
             const id = getLastPathItemHelper(r.url)
             await createType(id, r.name)
         }
-
     })
 
     it(`Successful update in DB`, async() => {
@@ -114,7 +114,7 @@ describe.skip(`Update type data concurrently in DB`, () => {
 
             const responses = await Promise.all(promises)
             expect("damage_relations" in responses[0].data).toBeTruthy()
-            for (key of Object.keys(responses[0].data.damage_relations)) {
+            for (const key of Object.keys(responses[0].data.damage_relations)) {
                 expect(key in typeProps).toBeTruthy()
             }
 
@@ -124,9 +124,9 @@ describe.skip(`Update type data concurrently in DB`, () => {
             const objectIdsQuery = await Type.find({}).select("id _id")
             objectIdsQuery.forEach(x => objectIds[x.id] = x._id)
 
-            for (idx in responses){
+            for (const idx in responses){
                 const dr = responses[idx].data.damage_relations
-                for (key of Object.keys(dr)) {
+                for (const key of Object.keys(dr)) {
                     updatePromises.push(updateType(ids[idx], typeProps[key], 
                         dr[key].map(x => objectIds[getLastPathItemHelper(x.url)])))
                 }
@@ -146,7 +146,7 @@ describe.skip(`Update type data concurrently in DB`, () => {
             expect(actual.ddto.map(x => x.name).sort()).toEqual(expected.ddto.sort())
 
         } catch (err) { 
-            console.log(err) 
+            throw err
         }
     })
 })
@@ -170,14 +170,63 @@ describe(`Insert move and species data into DB`, () => {
 
     it(`Successful update in DB`, async() => {
 
-        let objectIds = { type: {}, generation: {}}
-        const requests = [Type.find({}).select("id _id"), Generation.find({}).select("id _id")]
-        const responses = await Promise.all(requests)
+        const dex_limit = 151
 
-        Object.keys(objectIds).forEach((x, i) => responses[i].forEach(y => objectIds[x][y.id] = y._id))
+        let objectIds = { type: {}, generation: {} }
+        const db_requests = [Type.find({}).select("name _id"), Generation.find({}).select("name _id")]
+        const db_responses = await Promise.all(db_requests)
 
-        // insert nat dex entries
+        Object.keys(objectIds).forEach((x, i) => db_responses[i].forEach(y => objectIds[x][y.name] = y._id))
+
+        // insert nat dex entry number / name
         const dex_response = await axios.get(baseURL + dexURL)
         expect("pokemon_entries" in dex_response.data).toBeTruthy()
-    })
+
+        let ids = [], names = [], generations = [], primary_types = [], secondary_types = []
+
+        let pkmn_requests = []
+        let species_requests = []
+
+        for (const pe of dex_response.data.pokemon_entries){
+
+            if (parseInt(pe.entry_number) > dex_limit){
+                break
+            }
+            
+            ids.push(pe.entry_number)
+            names.push(pe.pokemon_species.name)
+
+            pkmn_requests.push(axios(baseURL + '/pokemon/' + parseInt(pe.entry_number)))
+            species_requests.push(axios(pe.pokemon_species.url))
+        }
+
+
+        // insert types / generations
+
+        const pkmn_responses = await Promise.all(pkmn_requests)
+        const species_responses = await Promise.all(species_requests)
+
+        expect("types" in pkmn_responses[0].data).toBeTruthy()
+        expect("generation" in species_responses[0].data).toBeTruthy()
+
+        for (const idx in pkmn_responses){
+
+            const sp_types = pkmn_responses[idx].data.types
+            const pr = sp_types[0].type.name           
+            const se = (sp_types.length > 1) ? sp_types[1].type.name : null
+            const pk_gen = species_responses[idx].data.generation.name
+
+            primary_types.push(objectIds.type[pr])
+            secondary_types.push(objectIds.type[se])
+            generations.push(objectIds.generation[pk_gen])
+        }
+
+        // DB inserts are not concurrent
+        for (let i = 0; i < dex_limit; i++){
+            await createSpecies(ids[i], names[i], generations[i], primary_types[i], secondary_types[i])
+        }
+
+        const arno = await Species.findOne({name: "articuno"}).populate("generation primary_type secondary_type")
+        console.log(arno)
+    }, 30000)
 })
