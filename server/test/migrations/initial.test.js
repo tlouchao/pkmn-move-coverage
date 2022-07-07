@@ -1,6 +1,11 @@
 'use strict'
 const { setupTeardown } = require("../memoryUtils")
 
+const { baseURL, typeURL, generationURL, pkmnURL, getURLID, damageRelationsMap } = require("../../src/pokeapi")
+const { queryMap } = require("../../src/db")
+const logger = require("../../src/logger")
+const axios = require('axios')
+
 const Generation = require("../../src/models/generation")
 const Type = require("../../src/models/type")
 const Species = require("../../src/models/species")
@@ -11,32 +16,8 @@ const { createSpecies }  = require("../../src/seed/speciesSeed")
 const { createGeneration }  = require("../../src/seed/generationSeed")
 const { createType, updateType }  = require("../../src/seed/typeSeed")
 
-const baseURL = "https://pokeapi.co/api/v2"
-const generationURL = "/generation"
-const typeURL = "/type"
-const moveURL = "/move"
-const dexURL = "/pokedex/1"
-
-const typeProps = {
-    "double_damage_from": "ddfrom",
-    "double_damage_to": "ddto",
-    "half_damage_from": "hdfrom",
-    "half_damage_to": "hdto",
-    "no_damage_from": "ndfrom",
-    "no_damage_to": "ndto",
-}
-
-const axios = require('axios')
-
-const getLastPathItemHelper = path => {
-    const segments = path.split('/').filter(x => x != '')
-    const last = segments[segments.length - 1]
-    return isNaN(last) ? last : parseInt(last)
-}
-
 setupTeardown()
 
-// tests
 test("Axios invalid get request returns error", async() => {
     try {
         await axios.get(baseURL + "/generation/99")
@@ -45,7 +26,6 @@ test("Axios invalid get request returns error", async() => {
     }
 })
 
-// generation & type 
 describe.skip.each([ 
     [generationURL, 1, "generation-i", Generation, createGeneration],
     [typeURL, 1, "normal", Type, createType]
@@ -62,7 +42,7 @@ describe.skip.each([
         expect("results" in data).toBeTruthy()
         expect(Array.isArray(data.results)).toBeTruthy()
 
-        const res_id = getLastPathItemHelper(data.results[0].url)
+        const res_id = getURLID(data.results[0].url)
         const res_name = data.results[0].name
 
         expect(res_id).toEqual(id)
@@ -71,7 +51,7 @@ describe.skip.each([
 
     it("Successful create in DB", async() => {
         for (const r of data.results){
-            const id = getLastPathItemHelper(r.url)
+            const id = getURLID(r.url)
             await createModel(id, r.name)
         }
 
@@ -81,9 +61,9 @@ describe.skip.each([
     })
 })
 
-// update type damage relations
 describe.skip(`Update type data concurrently in DB`, () => {
 
+    // get types
     let data
     beforeEach(async() => {
 
@@ -91,7 +71,7 @@ describe.skip(`Update type data concurrently in DB`, () => {
         data = response.data
 
         for (const r of data.results){
-            const id = getLastPathItemHelper(r.url)
+            const id = getURLID(r.url)
             await createType(id, r.name)
         }
     })
@@ -100,39 +80,36 @@ describe.skip(`Update type data concurrently in DB`, () => {
 
         try {
 
-            let ids = []
-            let names = []
-            let promises = []
+            let ids = [], names = []
+            let axiosPromises = [], axiosResponses = []
 
+            // id: _id
+            const typeIds = await queryMap(Type, "id")
+
+            // get name/url from response
             for (const r of data.results){
-
-                ids.push(getLastPathItemHelper(r.url))
+                ids.push(getURLID(r.url))
                 names.push(r.name)
-                promises.push(axios(r.url))
-
+                axiosPromises.push(axios(r.url))
             }
 
-            const responses = await Promise.all(promises)
-            expect("damage_relations" in responses[0].data).toBeTruthy()
-            for (const key of Object.keys(responses[0].data.damage_relations)) {
-                expect(key in typeProps).toBeTruthy()
-            }
+            // get types details concurrently
+            axiosResponses = await Promise.all(axiosPromises)
 
-            // iterate over props
+            // update damage relations concurrently
             let updatePromises = []
-            let objectIds = {}
-            const objectIdsQuery = await Type.find({}).select("id _id")
-            objectIdsQuery.forEach(x => objectIds[x.id] = x._id)
 
-            for (const idx in responses){
-                const dr = responses[idx].data.damage_relations
-                for (const key of Object.keys(dr)) {
-                    updatePromises.push(updateType(ids[idx], typeProps[key], 
-                        dr[key].map(x => objectIds[getLastPathItemHelper(x.url)])))
+            for (const i in axiosResponses){
+                const dmg = axiosResponses[i].data.damage_relations
+                for (const key of Object.keys(dmg)) {
+                    updatePromises.push(updateType(ids[i], damageRelationsMap[key], 
+                        dmg[key].map(x => typeIds[getURLID(x.url)])))
                 }
             }
 
             await Promise.all(updatePromises) 
+
+            // check DB contents
             const actual = await Type.findOne({name: "fighting"})
                 .populate({path: "ddfrom", select: "-_id name"})
                 .populate({path: "ddto", select: "-_id name"})
@@ -153,6 +130,7 @@ describe.skip(`Update type data concurrently in DB`, () => {
 
 describe(`Insert move and species data into DB`, () => {
 
+    // before test, insert generation and type models into DB
     let responses
     beforeEach(async() => {
 
@@ -162,71 +140,75 @@ describe(`Insert move and species data into DB`, () => {
         for (const idx in responses){
             const createModels = [createGeneration, createType]
             for (const r of responses[idx].data.results){
-                const id = getLastPathItemHelper(r.url)
+                const id = getURLID(r.url)
                 await createModels[idx](id, r.name)
             }
         }
     })
 
-    it(`Successful update in DB`, async() => {
+    it(`Successful create in DB`, async() => {
+        
+        let t1, t2 // measure performance
+        let ids = [], names = [], generations = []
+        let primary_types = [], secondary_types = []
 
-        const dex_limit = 151
+        const genIds = await queryMap(Generation, "id")
+        const typeNames = await queryMap(Type, "name")
 
-        let objectIds = { type: {}, generation: {} }
-        const db_requests = [Type.find({}).select("name _id"), Generation.find({}).select("name _id")]
-        const db_responses = await Promise.all(db_requests)
-
-        Object.keys(objectIds).forEach((x, i) => db_responses[i].forEach(y => objectIds[x][y.name] = y._id))
-
-        // insert nat dex entry number / name
-        const dex_response = await axios.get(baseURL + dexURL)
-        expect("pokemon_entries" in dex_response.data).toBeTruthy()
-
-        let ids = [], names = [], generations = [], primary_types = [], secondary_types = []
-
-        let pkmn_requests = []
-        let species_requests = []
-
-        for (const pe of dex_response.data.pokemon_entries){
-
-            if (parseInt(pe.entry_number) > dex_limit){
-                break
-            }
+        // concurrent get requests per generation (151 reqs for Gen 1, 101 reqs for Gen 2, etc.)
+        for (const genId of Object.keys(genIds)){
             
-            ids.push(pe.entry_number)
-            names.push(pe.pokemon_species.name)
+            t1 = Date.now()
+            let pkmnPromises = []
 
-            pkmn_requests.push(axios(baseURL + '/pokemon/' + parseInt(pe.entry_number)))
-            species_requests.push(axios(pe.pokemon_species.url))
+            const genResponse = await axios.get(baseURL + "/generation/" + genId)
+            let ordered_species = genResponse.data.pokemon_species
+            ordered_species.sort((a, b) => { // sort by national dex ID
+                const [au, bu] = [getURLID(a.url), getURLID(b.url)]
+                return (au == bu) ? 0 : ((au < bu) ? -1 : 1)
+            })
+            ordered_species.forEach(x => {
+                ids.push(getURLID(x.url))
+                names.push(x.name)
+                generations.push(genIds[genId])
+                pkmnPromises.push(axios(baseURL + pkmnURL + '/' + getURLID(x.url)))
+            })
+
+            const pkmnResponses = await Promise.all(pkmnPromises)
+
+            pkmnResponses.forEach(x => {
+                const pr = x.data.types[0].type.name
+                const se = (x.data.types.length > 1) ? x.data.types[1].type.name : null
+                primary_types.push(typeNames[pr])
+                secondary_types.push(typeNames[se])
+            })
+
+            t2 = Date.now()
+            logger.info(`Generation ${genId} promises time elapsed: ${t2 - t1} ms`)
         }
-
-
-        // insert types / generations
-
-        const pkmn_responses = await Promise.all(pkmn_requests)
-        const species_responses = await Promise.all(species_requests)
-
-        expect("types" in pkmn_responses[0].data).toBeTruthy()
-        expect("generation" in species_responses[0].data).toBeTruthy()
-
-        for (const idx in pkmn_responses){
-
-            const sp_types = pkmn_responses[idx].data.types
-            const pr = sp_types[0].type.name           
-            const se = (sp_types.length > 1) ? sp_types[1].type.name : null
-            const pk_gen = species_responses[idx].data.generation.name
-
-            primary_types.push(objectIds.type[pr])
-            secondary_types.push(objectIds.type[se])
-            generations.push(objectIds.generation[pk_gen])
-        }
-
         // DB inserts are not concurrent
-        for (let i = 0; i < dex_limit; i++){
+        t1 = Date.now()
+        for (let i = 0; i < ids.length; i++){
             await createSpecies(ids[i], names[i], generations[i], primary_types[i], secondary_types[i])
         }
+        t2 = Date.now()
+        logger.info(`Create species promises time elapsed: ${t2 - t1} ms`)
 
-        const arno = await Species.findOne({name: "articuno"}).populate("generation primary_type secondary_type")
-        console.log(arno)
-    }, 30000)
+        // check contents of DB
+        const charizard = await Species.findOne({name: "charizard"})
+        .populate("generation primary_type secondary_type")
+        expect(charizard.id).toEqual(6)
+        expect(charizard.generation.id).toEqual(1)
+        expect(charizard.primary_type.name).toEqual("fire")
+        expect(charizard.secondary_type.name).toEqual("flying")
+
+        const sylveon = await Species.findOne({name: "sylveon"})
+        .populate("generation primary_type secondary_type")
+        console.log(sylveon)
+        expect(sylveon.id).toEqual(700)
+        expect(sylveon.generation.id).toEqual(6)
+        expect(sylveon.primary_type.name).toEqual("fairy")
+        expect(sylveon.secondary_type).toBeNull()
+
+    }, 60000) // 1 minute timeout
 })

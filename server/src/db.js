@@ -22,3 +22,8 @@ module.exports.closeDB = async() => {
     logger.error(`Error closing connection. \n${err}`)
   })
 }
+
+module.exports.queryMap = async(model, key) => {
+    const query = await model.find({}).select(`${key} _id`)
+    return query.reduce((acc, x) => { acc[x[key]] = x._id; return acc; }, {})
+}
