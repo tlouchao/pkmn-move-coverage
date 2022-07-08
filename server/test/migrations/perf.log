@@ -1,9 +1,26 @@
-Generation 1 promises time elapsed: 4407 ms
-Generation 2 promises time elapsed: 3005 ms
-Generation 3 promises time elapsed: 3729 ms
-Generation 4 promises time elapsed: 2528 ms
-Generation 5 promises time elapsed: 2810 ms
-Generation 6 promises time elapsed: 1432 ms
-Generation 7 promises time elapsed: 1216 ms
-Generation 8 promises time elapsed: 1011 ms
-Create species promises time elapsed: 10773 ms
+info: Generation 1: gen promises time elapsed: 80 ms
+info: Generation 1: pkmn promises time elapsed: 3771 ms
+info: Generation 1: move promises time elapsed: 1460 ms
+info: Generation 2: gen promises time elapsed: 100 ms
+info: Generation 2: pkmn promises time elapsed: 2650 ms
+info: Generation 2: move promises time elapsed: 867 ms
+info: Generation 3: gen promises time elapsed: 105 ms
+info: Generation 3: pkmn promises time elapsed: 3121 ms
+info: Generation 3: move promises time elapsed: 1117 ms
+info: Generation 4: gen promises time elapsed: 77 ms
+info: Generation 4: pkmn promises time elapsed: 2140 ms
+info: Generation 4: move promises time elapsed: 988 ms
+info: Generation 5: gen promises time elapsed: 109 ms
+info: Generation 5: pkmn promises time elapsed: 2707 ms
+info: Generation 5: move promises time elapsed: 1196 ms
+info: Generation 6: gen promises time elapsed: 384 ms
+info: Generation 6: pkmn promises time elapsed: 1170 ms
+info: Generation 6: move promises time elapsed: 539 ms
+info: Generation 7: gen promises time elapsed: 87 ms
+info: Generation 7: pkmn promises time elapsed: 1105 ms
+info: Generation 7: move promises time elapsed: 782 ms
+info: Generation 8: gen promises time elapsed: 100 ms
+info: Generation 8: pkmn promises time elapsed: 763 ms
+info: Generation 8: move promises time elapsed: 460 ms
+info: Create DB species promises time elapsed: 11023 ms
+info: Create DB moves promises time elapsed: 8862 ms

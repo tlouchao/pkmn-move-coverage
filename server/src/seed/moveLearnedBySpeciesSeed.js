@@ -1,8 +1,8 @@
 const MoveLearnedBySpecies = require("../models/moveLearnedBySpecies")
 
-async function createMoveLearnedBySpecies(move_id, species_id){
+async function createMoveLearnedBySpecies(move, species){
     try {
-        const m = new MoveLearnedBySpecies({move_id: move_id, species_id: species_id})
+        const m = new MoveLearnedBySpecies({move: move, species: species})
         return await m.save()
     } catch (err) {
         throw err
